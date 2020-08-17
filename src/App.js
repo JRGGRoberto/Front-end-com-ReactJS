@@ -1,32 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from './services/api';
 
 import Header from './componentes/Header';
 import Frase from './componentes/Frase';
 
 import './App.css';
-import backgroundImage from './assets/english.png';
 
 function App() {
-  const [projects, setlProjects]= useState(['Desenvolvimento de app', 'Front-end web']);
-  // useState retorna um array com 2 posições
+  const [projects, setlProjects]= useState([]);
 
-  // 1. variavel com o seu valor inicial
-  // 2. função para atualização desse valor 
+  useEffect(() => {
+    api.get('projects').then(response => {
+      setlProjects(response.data);
+    });
+  }, []);
+  
+  async function handleAddProject() {
+    const response = await api.post('projects', {
+      title: `Novo projeto ${Date.now()}`,
+      owner: 'Roberto Góes',
+    });
 
-  function handleAddProject() {
-//    projects.push(`Novo projeto ${Date.now()}`);   
-    setlProjects([...projects, `Novo projeto ${Date.now()}`]);
-    console.log(projects);
+    const project = response.data;
+
+    setlProjects([...projects, project]);
+
   }
 
   return (
     <>
       <Header title="Projects" />
 
-      <img src={backgroundImage} width={300} alt=""/>
-
       <ul>
-        {projects.map(project => <li key={project}>{project}</li> )}
+        {projects.map(project => <li key={project.id}>{project.title}</li> )}
       </ul>
 
       <button type="button" onClick={handleAddProject} >Adicionar projeto</button>
